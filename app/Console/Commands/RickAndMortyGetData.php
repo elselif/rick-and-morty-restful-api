@@ -3,6 +3,8 @@
 namespace App\Console\Commands;
 
 use App\Models\Character;
+use App\Models\Episode;
+use App\Models\Location;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 
@@ -28,10 +30,12 @@ class RickAndMortyGetData extends Command
      */
     public function handle()
     {
-        $response = Http::get('https://rickandmortyapi.com/api/character');
+        $responseCharacter = Http::get('https://rickandmortyapi.com/api/character');
+        $responseEpisode = Http::get('https://rickandmortyapi.com/api/episode');
+        $responseLocation = Http::get('https://rickandmortyapi.com/api/location');
 
-        if ($response->successful()) {
-            $data = $response->json()['results'];
+        if ($responseCharacter->successful()) {
+            $data = $responseCharacter->json()['results'];
 
             foreach ($data as $item) {
                 // Verileri alarak veritabanına kaydedin
@@ -48,12 +52,58 @@ class RickAndMortyGetData extends Command
                         'image' => $item['image'],
                     ]
                 );
+
+
             }
 
             $this->info('Data has been fetched and stored successfully!');
         } else {
             $this->error('Failed to fetch data from API!');
         }
+
+        if ($responseEpisode->successful()) {
+            $data = $responseEpisode->json()['results'];
+
+            foreach ($data as $item) {
+                // Verileri alarak veritabanına kaydedin
+                Episode::updateOrCreate(
+                    ['id' => $item['id']], // Eğer bölüm zaten varsa güncelle, yoksa oluştur
+                    [
+                        'name' => $item['name'],
+                        'air_date' => $item['air_date'],
+                        'episode' => $item['episode'],
+                        'url' => $item['url'],
+                    ]
+                );
+            }
+
+            $this->info('Data has been fetched and stored successfully!');
+        } else {
+            $this->error('Failed to fetch data from API!');
+        }
+
+        if ($responseLocation->successful()) {
+            $data = $responseLocation->json()['results'];
+
+            foreach ($data as $item) {
+                // Verileri alarak veritabanına kaydedin
+                Location::updateOrCreate(
+                    ['id' => $item['id']], // Eğer konum zaten varsa güncelle, yoksa oluştur
+                    [
+                        'name' => $item['name'],
+                        'type' => $item['type'],
+                        'dimension' => $item['dimension'],
+                        'url' => $item['url'],
+                    ]
+                );
+            }
+        $this->info('Data has been fetched and stored successfully!');
+        } else {
+            $this->error('Failed to fetch data from API!');
+        }
     }
+
+
+
 
 }
