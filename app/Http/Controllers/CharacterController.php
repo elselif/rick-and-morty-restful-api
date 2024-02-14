@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Character;
+use App\Models\Location;
 use Illuminate\Http\Request;
 
 class CharacterController extends Controller
@@ -10,9 +11,11 @@ class CharacterController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $characters = Character::with(['origin', 'location'])->get();
+        $perPage = $request->input('per_page', 10); // Her sayfada gösterilecek karakter sayısı, varsayılan olarak 10
+        $characters = Character::with(['origin', 'location'])->paginate($perPage); // Sayfalama için paginate kullanıyoruz
+
         $formattedCharacters = [];
         foreach ($characters as $character) {
             $formattedCharacter = [
@@ -27,7 +30,7 @@ class CharacterController extends Controller
                     'url' => $character->origin,
                 ],
                 'location' => [
-                    'name' => $character->locations,
+                    'name' => $character->location,
                     'url' => $character->location,
                 ],
                 'image' => $character->image,
@@ -38,10 +41,10 @@ class CharacterController extends Controller
 
         $responseData = [
             'info' => [
-                'count' => count($characters),
-                'pages' => 1,
-                'next' => null,
-                'prev' => null,
+                'count' => $characters->total(), // Toplam karakter sayısı
+                'pages' => $characters->lastPage(), // Toplam sayfa sayısı
+                'next' => $characters->nextPageUrl(), // Bir sonraki sayfanın URL'si
+                'prev' => $characters->previousPageUrl(), // Bir önceki sayfanın URL'si
             ],
             'results' => $formattedCharacters,
         ];
@@ -55,10 +58,35 @@ class CharacterController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-    {
-        $character = Character::create($request->all());
-        return response()->json($character, 201);
-    }
+{
+    
+    $character = new Character();
+
+
+    $character->name = $request->input('name');
+    $character->status = $request->input('status');
+    $character->species = $request->input('species');
+    $character->type = $request->input('type', '');
+    $character->gender = $request->input('gender');
+
+
+    $originName = $request->input('origin.name');
+    $locationName = $request->input('location.name');
+    $origin = Location::where('type', $originName)->first();
+    $location = Location::where('name', $locationName)->first();
+
+
+    $character->origin()->associate($origin);
+    $character->location()->associate($location);
+
+    $character->image = $request->input('image');
+
+
+    $character->save();
+
+
+    return response()->json($character, 201);
+}
 
     /**
      * Display the specified resource.
@@ -72,10 +100,15 @@ class CharacterController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request,$id)
+    public function update(Request $request, $id)
     {
+
         $character = Character::findOrFail($id);
-        $character->update($request->all());
+
+
+        $character->update($request->only(['name', 'status', 'species', 'type', 'gender', 'origin', 'location', 'image']));
+
+
         return response()->json($character, 200);
     }
 
