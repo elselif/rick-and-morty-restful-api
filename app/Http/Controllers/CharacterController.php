@@ -16,6 +16,7 @@ class CharacterController extends Controller
         $perPage = $request->input('per_page', 10); // Her sayfada gösterilecek karakter sayısı, varsayılan olarak 10
         $characters = Character::with(['origin', 'location'])->paginate($perPage); // Sayfalama için paginate kullanıyoruz
 
+
         $formattedCharacters = [];
         foreach ($characters as $character) {
             $formattedCharacter = [
@@ -26,12 +27,12 @@ class CharacterController extends Controller
                 'type' => $character->type,
                 'gender' => $character->gender,
                 'origin' => [
-                    'name' => $character->origin,
-                    'url' => $character->origin,
+                    'name' => $character->origin_id ? Location::find($character->origin_id)->name : null,
+                    'url' => $character->origin_id ? Location::find($character->origin_id)->url : null,
                 ],
                 'location' => [
-                    'name' => $character->location,
-                    'url' => $character->location,
+                    'name' => $character->location_id ? Location::find($character->location_id)->name : null,
+                    'url' => $character->location_id ? Location::find($character->location_id)->url : null,
                 ],
                 'image' => $character->image,
                 'created' => $character->created_at,
@@ -59,7 +60,7 @@ class CharacterController extends Controller
      */
     public function store(Request $request)
 {
-    
+
     $character = new Character();
 
 
