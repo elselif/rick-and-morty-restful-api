@@ -8,4 +8,20 @@ use Illuminate\Database\Eloquent\Model;
 class Episode extends Model
 {
     use HasFactory;
+
+    protected $table = "episodes";
+    
+    protected $fillable = [
+        'name',
+        'air_date',
+        'episode',
+        'url',
+    ];
+
+
+
+    public function characters()
+    {
+        return $this->hasMany(Character::class);
+    }
 }
