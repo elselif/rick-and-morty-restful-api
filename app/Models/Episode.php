@@ -10,7 +10,7 @@ class Episode extends Model
     use HasFactory;
 
     protected $table = "episodes";
-    
+
     protected $fillable = [
         'name',
         'air_date',
@@ -24,4 +24,9 @@ class Episode extends Model
     {
         return $this->hasMany(Character::class);
     }
+
+    // public function characters()
+    // {
+    //     return $this->belongsToMany(Character::class, 'character_episode');
+    // }
 }

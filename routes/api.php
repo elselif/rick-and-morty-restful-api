@@ -36,7 +36,7 @@ Route::group(['prefix' => 'episodes'], function () {
     Route::put('/{id}', [EpisodeController::class, 'update']);
     Route::delete('/{id}', [EpisodeController::class, 'destroy']);
 });
-Route::group(['prefix' => 'episodes'], function () {
+Route::group(['prefix' => 'locations'], function () {
     Route::get('/', [LocationController::class, 'index']);
     Route::get('/{id}', [LocationController::class, 'show']);
     Route::post('/', [LocationController::class, 'store']);

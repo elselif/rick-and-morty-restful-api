@@ -12,15 +12,20 @@ class Location extends Model
     protected $table = "locations";
 
     protected $fillable = [
+        'id',
         'name',
         'type',
         'dimension',
         'url',
+
     ];
 
     // Bir lokasyonda birden fazla karakter olabileceğini belirtiyoruz
     public function characters()
     {
-        return $this->hasMany(Character::class);
+        return $this->hasMany(Character::class, 'location_id');
     }
+
+  
+
 }

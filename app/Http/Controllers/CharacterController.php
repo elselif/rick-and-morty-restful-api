@@ -12,9 +12,44 @@ class CharacterController extends Controller
      */
     public function index()
     {
-        $characters = Character::all();
-        return response()->json($characters);
+        $characters = Character::with(['origin', 'location'])->get();
+        $formattedCharacters = [];
+        foreach ($characters as $character) {
+            $formattedCharacter = [
+                'id' => $character->id,
+                'name' => $character->name,
+                'status' => $character->status,
+                'species' => $character->species,
+                'type' => $character->type,
+                'gender' => $character->gender,
+                'origin' => [
+                    'name' => $character->origin,
+                    'url' => $character->origin,
+                ],
+                'location' => [
+                    'name' => $character->locations,
+                    'url' => $character->location,
+                ],
+                'image' => $character->image,
+                'created' => $character->created_at,
+            ];
+            $formattedCharacters[] = $formattedCharacter;
+        }
+
+        $responseData = [
+            'info' => [
+                'count' => count($characters),
+                'pages' => 1,
+                'next' => null,
+                'prev' => null,
+            ],
+            'results' => $formattedCharacters,
+        ];
+
+        return response()->json($responseData);
     }
+
+
 
     /**
      * Store a newly created resource in storage.

@@ -38,23 +38,41 @@ class RickAndMortyGetData extends Command
             $data = $responseCharacter->json()['results'];
 
             foreach ($data as $item) {
-                // Verileri alarak veritabanına kaydedin
-                Character::updateOrCreate(
-                    ['id' => $item['id']], // Eğer karakter zaten varsa güncelle, yoksa oluştur
+
+                $character = Character::updateOrCreate(
+                    ['id' => $item['id']],
                     [
                         'name' => $item['name'],
                         'status' => $item['status'],
                         'species' => $item['species'],
-                        'type' => $item['type'],
+                        'type' => isset($item['type']) ? $item['type'] : null,
                         'gender' => $item['gender'],
-                        'origin' => $item['origin']['name'],
-                        'location' => $item['location']['name'],
                         'image' => $item['image'],
                     ]
                 );
 
 
+                $location = Location::where('name', $item['location']['name'])->first();
+                if (!$location) {
+                    $location = new Location();
+                    $location->name = $item['location']['name'];
+                    $location->save();
+                }
+
+
+                $origin = Location::where('name', $item['origin']['name'])->first();
+                if (!$origin) {
+                    $origin = new Location();
+                    $origin->name = $item['origin']['name'];
+                    $origin->save();
+                }
+
+
+                $character->location_id = $location->id;
+                $character->origin_id = $origin->id;
+                $character->save();
             }
+
 
             $this->info('Data has been fetched and stored successfully!');
         } else {
@@ -65,9 +83,9 @@ class RickAndMortyGetData extends Command
             $data = $responseEpisode->json()['results'];
 
             foreach ($data as $item) {
-                // Verileri alarak veritabanına kaydedin
+
                 Episode::updateOrCreate(
-                    ['id' => $item['id']], // Eğer bölüm zaten varsa güncelle, yoksa oluştur
+                    ['id' => $item['id']],
                     [
                         'name' => $item['name'],
                         'air_date' => $item['air_date'],
@@ -86,9 +104,9 @@ class RickAndMortyGetData extends Command
             $data = $responseLocation->json()['results'];
 
             foreach ($data as $item) {
-                // Verileri alarak veritabanına kaydedin
+
                 Location::updateOrCreate(
-                    ['id' => $item['id']], // Eğer konum zaten varsa güncelle, yoksa oluştur
+                    ['id' => $item['id']], 
                     [
                         'name' => $item['name'],
                         'type' => $item['type'],
